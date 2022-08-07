@@ -1,6 +1,6 @@
 # BUPT 2019-nCoV Report Bot
 
-[Click here to try Online](https://t.me/buptncovbot)
+[Click here to try Online](https://t.me/ucasncovbot)
 
 ## Requirements
 
@@ -36,4 +36,5 @@ Pull requests and issues are always welcome.
 
 ## Credit
 
-Special thanks to [ipid/bupt-ncov-report](https://github.com/ipid/bupt-ncov-report).
+Special thanks to [HenryzhaoH/bupt-ncov-report-tgbot](https://github.com/HenryzhaoH/bupt-ncov-report-tgbot) and [WANNA959/ucas-covid19](https://github.com/WANNA959/ucas-covid19)
+

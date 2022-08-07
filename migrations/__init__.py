@@ -1,1 +1,0 @@
-from .migration_20200903_add_xisu_checkin import AddXisuCheckinAbstractMigration

@@ -26,95 +26,78 @@ def match_re_group1(re_str: str, text: str) -> str:
 
     return match.group(1)
 
-def extract_post_data(html: str, old_data=None) -> Dict[str, str]:
+def extract_post_data(json_txt: str) -> Dict[str, str]:
     """
-    从上报页面的 HTML 中，提取出上报 API 所需要填写的参数。
+    从上报页面的 数据接口 中，提取出上报 API 所需要填写的参数。
     :return: 最终 POST 的参数（使用 dict 表示）
     """
-    new_data = match_re_group1(r'var def = (\{.+\});', html)
-    if old_data == None:
-        old_data = match_re_group1(r'oldInfo: (\{.+\}),', html)
 
     # 检查数据是否足够长
-    if len(old_data) < REASONABLE_LENGTH or len(new_data) < REASONABLE_LENGTH:
-        _logger.debug(f'\nold_data: {old_data}\nnew_data: {new_data}')
+    _logger.debug(f"\n{len(json_txt)} bytes of json data received.")
+    if len(json_txt) < REASONABLE_LENGTH:
+        _logger.debug(f'\nshort old_data: {json_txt}\n')
         raise ValueError('获取到的数据过短。请阅读脚本文档的“使用前提”部分')
 
-    old_data, new_data = json.loads(old_data), json.loads(new_data)
+    old_data = json.loads(json_txt)['d']
+    _logger.debug(f'\nold_data: {old_data}\n')
 
-    # 需要从 new dict 中提取如下数据
-    PICK_PROPS = (
-        'id', 'uid', 'date', 'created',
-    )
+    new_data = {
+        'realname': old_data['realname'],
+        'number': old_data['number'],
+        'szgj_api_info': old_data['szgj_api_info'], # 似乎没用？
+        # 'szgj': old_data['szgj'],# 2021.8.1 del 
+        # 'old_sfzx': old_data['sfzx'],# 2021.8.1 del
+        'sfzx': old_data['sfzx'], #是否在校
+        # 'szdd': old_data['szdd'], #所在地点
+        'szdd': '国内', #所在地点 update 2022.2.9
+        # 'sflgj': old_data['sflgj'],
+        'ismoved': 0,  # 如果前一天位置变化这个值会为1，第二天仍然获取到昨天的1，而事实上位置是没变化的，所以置0
+        # 'ismoved': old_data['ismoved'],
+        'tw': old_data['tw'], #体温
+        # 'bztcyy': old_data['bztcyy'], # 2021.8.1 del
+        # 'sftjwh': old_data['sfsfbh'],  # 2020.9.16 del
+        # 'sftjhb': old_data['sftjhb'],  # 2020.9.16 del
+        'sfcxtz': old_data['sfcxtz'], #todo 是否出现症状
+        # 'sfyyjc': old_data['sfyyjc'],# 2021.8.1 del
+        # 'jcjgqr': old_data['jcjgqr'],# 2021.8.1 del
+        # 'sfjcwhry': old_data['sfjcwhry'],  # 2020.9.16 del
+        # 'sfjchbry': old_data['sfjchbry'],  # 2020.9.16 del
+        'sfjcbh': old_data['sfjcbh'],  # 是否接触病患
+        # 'jcbhlx': old_data['jcbhlx'], # 2021.1.29 del 接触病患类型
+        'sfcyglq': old_data['sfcyglq'],  # 是否处于隔离期（观察期
+        # 'gllx': old_data['gllx'],   # 2021.1.29 del 隔离类型
+        'sfcxzysx': old_data['sfcxzysx'], #
+        # 'old_szdd': old_data['szdd'],# 2021.8.1 del
+        'geo_api_info': old_data['old_city'],  # 保持昨天的结果
+        'old_city': old_data['old_city'],
+        'geo_api_infot': old_data['geo_api_infot'],
+        'date': datetime.datetime.now(tz=pytz_timezone("Asia/Shanghai")).strftime("%Y-%m-%d"),
+        # 近14日未离京
+        # 'fjsj': old_data['fjsj'],  # 返京时间# 2021.8.1 del
+        # 'ljrq': old_data['ljrq'],  # 离京日期 add@2021.1.24# 2021.8.1 del
+        # 'qwhd': old_data['qwhd'],  # 去往何地 add@2021.1.24# 2021.8.1 del
+        # 'chdfj': old_data['chdfj'],  # 从何地返京 add@2021.1.24# 2021.8.1 del
 
-    for prop in PICK_PROPS:
-        val = new_data.get(prop, ...)
-        if val is ...:
-            raise RuntimeError(f'从网页上提取的 new data 中缺少属性 {prop}，可能网页已经改版。')
-        old_data[prop] = val
-
-    SANITIZE_PROPS = {
-        'ismoved': 0,
-        'jhfjrq': '',
-        'jhfjjtgj': '',
-        'jhfjhbcc': '',
-        'sfxk': 0,
-        'xkqq': '',
-        'szgj': '',
-        'szcs': '',
-        # Moved info sanitize
-        'sfsfbh': 0,
-        'xjzd': '',
-        'bztcyy': '',
-        'zgfxdq': 0,
-        'mjry': 0,
-        'csmjry': 0,
-        # Misc info sanitize
-        'gwszdd': '',
-        'sfyqjzgc': '',
+        # 'jcbhrq': old_data['jcbhrq'], # del 2021.1.29 接触病患日期
+        # 'glksrq': old_data['glksrq'], # del 2021.1.29 隔离开始日期
+        # 'fxyy': old_data['fxyy'],# 2021.8.1 del
+        # 'jcjg': old_data['jcjg'],# 2021.8.1 del
+        # 'jcjgt': old_data['jcjgt'],# 2021.8.1 del
+        # 'qksm': old_data['qksm'],# 2021.8.1 del
+        # 'remark': old_data['remark'],
+        'jcjgqk': old_data['jcjgqk'],  #情况
+        'jrsflj': old_data['jrsflj'],  # add @2020.9.16 近日是否离京
+        # 'jcwhryfs': old_data['jcwhryfs'],# 2021.8.1 del
+        # 'jchbryfs': old_data['jchbryfs'],# 2021.8.1 del
+        'gtshcyjkzt': old_data['gtshcyjkzt'],  # add @2020.9.16 共同生活人员健康状况
+        'jrsfdgzgfxdq': old_data['jrsfdgzgfxdq'],  # add @2020.9.16 近日是否到过中高风险地区
+        'app_id': 'ucas'
     }
-    old_data.update(SANITIZE_PROPS)
 
-    try:
-        if len(old_data['address']) == 0 \
-        or (
-            len(old_data['city']) == 0 \
-            and old_data['province'] in ['北京市','上海市','重庆市','天津市']
-        ):
-            geo_info = json.loads(old_data['geo_api_info'])
-            old_data['address'] = geo_info['formattedAddress']
-            old_data['province'] = geo_info['addressComponent']['province']
-            if old_data['province'] in ['北京市','上海市','重庆市','天津市']:
-                old_data['city'] = geo_info['addressComponent']['province']
-            else:
-                old_data['city'] = geo_info['addressComponent']['city']
-            old_data['area'] = ' '.join([old_data['province'], old_data['city'], geo_info['addressComponent']['district']])
-    except json.decoder.JSONDecodeError as e:
-        raise RuntimeError(f'定位信息为空，自动修复地址信息失败。手动上报一次后方可正常使用。')
+    if old_data["jrsflj"]!="否" :
+        raise RuntimeError(f'近日是否离京不为否。请暂停后手动打卡！')
 
-    return old_data
-
-def build_xisu_ncov_checkin_post_data(ncov_report_page_html, xisu_nconv_checkin_pending_form):
-    ncov_report_post_data = extract_post_data(ncov_report_page_html)
-
-    filled_form = xisu_nconv_checkin_pending_form['d']['info']
-    assert filled_form, f"报告页面 {XISU_HISTORY_DATA} 返回信息不正确，可能尚未填写过晨午晚检签到"
-    assert 'tw' in filled_form, f"报告页面 {XISU_HISTORY_DATA} 返回信息不正确"
-
-    del filled_form['date']
-    del filled_form['flag']
-    del filled_form['uid']
-    del filled_form['creator']
-    del filled_form['created']
-    del filled_form['id']
-
-    filled_form['area'] = ncov_report_post_data['area']
-    filled_form['city'] = ncov_report_post_data['city']
-    filled_form['province'] = ncov_report_post_data['province']
-    filled_form['address'] = ncov_report_post_data['address']
-    filled_form['geo_api_info'] = ncov_report_post_data['geo_api_info']
-
-    return filled_form
+    return new_data
 
 def display_time_formatted():
     # Return human-readable date with current display timezone, regardless of the host's timezone settings
