@@ -23,12 +23,9 @@ You can change this behavior in `include/config.py`.
 
 Following step are proceed when checkin. 
 
-1. Extracts `oldInfo` and `def` from web page.
-2. Replace `id`, `uid`, `date`, and `created` in `oldInfo` by the ones in `def`.
-3. Sanitize these properties using default values:  
-`ismoved`, `jhfjrq`, `jhfjjtgj`, `jhfjhbcc`, `sfxk`, `xkqq`, `sfsfbh`, `ismoved`, `xjzd`, `bztcyy`.
-4. Pick `address`, `city`, `province`, `area` out from `geo_api_info` if they are empty.
-5. Post final data to saving API.
+1. Get info from daily API.
+2. Construct message from last day message.
+3. Post final data to saving API.
 
 ## Contributing
 
