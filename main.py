@@ -226,6 +226,11 @@ def checkinall_entry(update, context):
     else:
         checkin_all()
 
+def pauseall_entry(update, context):
+    assert update.message.from_user.id == TG_BOT_MASTER
+    pause_all()
+
+
 def listall_entry(update, context):
     assert update.message.from_user.id == TG_BOT_MASTER
     list_entry(update,context,admin_all=True)
@@ -311,6 +316,24 @@ def checkin_all():
             logger.warning(str(e))
     logger.info("checkin_all finished!")
 
+def pause_all():
+    logger.info("pause_all started!")
+    user : UCASUser
+    for user in UCASUser.select().where(UCASUser.status == UCASUserStatus.normal).prefetch(TGUser):
+        ret_msg = ''
+        try:
+            user.pause()
+            ret_msg = f"用户：`{user.username or user.cookie_eaisess or '[None]'}`\n系统管理已暂停签到！\n国科大系统更新，暂停服务1-2天，后续请手动开启更新。\n{display_time_formatted()}"
+        except Exception as e:
+            ret_msg = f"用户：`{user.username or user.cookie_eaisess or '[None]'}`\n暂停签到异常！\n服务器返回：`{e}`\n{display_time_formatted()}"
+            traceback.print_exc()
+        logger.info(ret_msg)
+        try:
+            updater.bot.send_message(chat_id=user.owner.userid, text=ret_msg, parse_mode = telegram.ParseMode.MARKDOWN)
+        except Exception as e:
+            logger.warning(str(e))
+    logger.info("pause_all finished!")
+
 def main():
     global updater, scheduler
     parser = argparse.ArgumentParser(description='UCAS 2019-nCoV Report Bot')
@@ -342,6 +365,7 @@ def main():
     dp.add_handler(CommandHandler("remove", remove_entry))
     dp.add_handler(MessageHandler(Filters.regex(r'^/(remove|resume|pause|checkin)_.*$'), text_command_entry))
     dp.add_handler(CommandHandler("checkinall", checkinall_entry))
+    dp.add_handler(CommandHandler("pauseall", pauseall_entry))
     dp.add_handler(CommandHandler("listall", listall_entry))
     dp.add_handler(CommandHandler("status", status_entry))
     dp.add_handler(CommandHandler("sendmsg", send_message_entry))

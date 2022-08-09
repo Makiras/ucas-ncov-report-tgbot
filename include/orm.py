@@ -85,6 +85,10 @@ class UCASUser(BaseModel):
         else:
             _logger.warning(f'[login] Failed! user: {self.username}, ret: {ret_data}')
             raise RuntimeWarning(f'Login failed! Server return: `{ret_data}`')
+    
+    def pause(self):
+        self.status = UCASUserStatus.stopped
+        self.save()
 
     def ncov_checkin(self, force=False):
         if not force:
