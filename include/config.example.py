@@ -4,29 +4,30 @@ LOGIN_API = 'https://app.ucas.ac.cn/uc/wap/login/check'
 REPORT_PAGE = 'https://app.ucas.ac.cn/ncov/wap/default/index'
 REPORT_DATA_API = 'https://app.ucas.ac.cn/ncov/api/default/daily'
 REPORT_API = 'https://app.ucas.ac.cn/ncov/api/default/save'
-API_TIMEOUT = 20 # in seconds
+API_TIMEOUT = 20  # in seconds
 
 REQUESTS_USERAGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36 Edg/101.0.1210.39'
 
 CRON_TIMEZONE = 'Asia/Shanghai'
 CHECKIN_ALL_CRON_HOUR = 8
 CHECKIN_ALL_CRON_MINUTE = 2
-CHECKIN_ALL_CRON_RETRY_HOUR   = 9
+CHECKIN_ALL_CRON_RETRY_HOUR = 9
 CHECKIN_ALL_CRON_RETRY_MINUTE = 23
 
 REASONABLE_LENGTH = 24
 
-TG_BOT_PROXY = None # example: {'proxy_url': 'socks5h://127.0.0.1:1080/'}
+TG_BOT_PROXY = None  # example: {'proxy_url': 'socks5h://127.0.0.1:1080/'}
 TG_BOT_TOKEN = ""   # Bot Token
 TG_BOT_MASTER = 0   # Master Telegram User ID
 
-CHECKIN_PROXY = {} # example: {'http': 'socks5://user:pass@host:port', 'https': 'socks5://user:pass@host:port'}
+# example: {'http': 'socks5://user:pass@host:port', 'https': 'socks5://user:pass@host:port'}
+CHECKIN_PROXY = {}
 
 BOT_DEBUG = False
 
 DISPLAY_TIMEZONE = 'Asia/Shanghai'
 
-HELP_MARKDOWN='''
+HELP_MARKDOWN = '''
 自动签到时间：每日8点2分，如果签到失败会自动重试，重试时间为9点23分。
 请在使用本 bot 前，**确保已经正确提交过一次上报**。
 本 bot 的目标签到系统为：[app.ucas.ac.cn/ncov/...](https://app.ucas.ac.cn/ncov/wap/default/index)
