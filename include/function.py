@@ -10,8 +10,10 @@ from .config import *
 
 _logger = logging.getLogger(__name__)
 
+
 class UsernameNotSet(Exception):
     pass
+
 
 def match_re_group1(re_str: str, text: str) -> str:
     """
@@ -25,6 +27,7 @@ def match_re_group1(re_str: str, text: str) -> str:
         raise ValueError(f'在文本中匹配 {re_str} 失败，没找到任何东西。\n请阅读脚本文档中的“使用前提”部分。')
 
     return match.group(1)
+
 
 def extract_post_data(json_txt: str) -> Dict[str, str]:
     """
@@ -45,7 +48,7 @@ def extract_post_data(json_txt: str) -> Dict[str, str]:
     # new_data = {
     #     'realname': old_data['realname'],
     #     'number': old_data['number'],
-    #     'szgj_api_info': old_data['szgj_api_info'], 
+    #     'szgj_api_info': old_data['szgj_api_info'],
     #     'sfzx': old_data['sfzx'], #是否在校
     #     'szdd': '国内', #所在地点 update 2022.2.9
     #     'ismoved': 0,  # 如果前一天位置变化这个值会为1，第二天仍然获取到昨天的1，而事实上位置是没变化的，所以置0
@@ -65,50 +68,49 @@ def extract_post_data(json_txt: str) -> Dict[str, str]:
     #     'app_id': 'ucas'
     # }
     # if old_data["jrsflj"]!="否" :
-        # raise RuntimeError(f'近日是否离京不为否。请暂停后手动打卡！')
+    # raise RuntimeError(f'近日是否离京不为否。请暂停后手动打卡！')
 
-    # app_id = 9 
+    # app_id = 9
     new_data = {
         'date': datetime.datetime.now(tz=pytz_timezone("Asia/Shanghai")).strftime("%Y-%m-%d"),
         'realname': old_data['realname'],
         'number': old_data['number'],
-        'jzdz': old_data['jzdz'], # 居住地址
-        'zrzsdd': old_data['zrzsdd'], # 昨日居住地点 
-        #todo: add new db column for 今日是否在校 
-        'sfzx': 5, # 是否在校 
-        'dqszdd': old_data['dqszdd'], # 当前所在地点
-        'geo_api_infot': old_data['geo_api_infot'], # 保持昨天的结果
-        'szgj': old_data['szgj'] ,# 所在国家
-        'szgj_select_info[id]': 0 ,# 所在国家
-        'szgj_select_info[name]': '', # 所在国家
-        'geo_api_info': old_data['old_city'], # 保持昨天的结果
-        'dqsfzzgfxdq': old_data['dqsfzzgfxdq'], # 当前是否在中高风险地区
-        'zgfxljs': old_data['zgfxljs'], # 中高风险旅居史
-        'tw': '1', # 体温，不是1就完蛋了
-        'sffrzz': '0' ,# 是否发热症状
-        'dqqk1': 1  ,# 当前情况状态
-        'dqqk1qt':  '',# 当前情况其他
-        'dqqk2': 1 ,# 当前情况健康码
-        'dqqk2qt':  '',# 当前情况其他
-        #todo: add new db column for 昨日是否接受核酸检测
-        'sfjshsjc': 0 ,# （昨日）是否接受核酸检测
-        'dyzymjzqk': old_data['dyzymjzqk'], # 第一针疫苗接种情况
-        'dyzwjzyy':  old_data['dyzwjzyy'] ,# 第一帧未接种原因
-        'dyzjzsj': old_data['dyzjzsj'], # 第一帧疫苗接种时间
-        'dezymjzqk': old_data['dezymjzqk'], # 第二针疫苗接种情况
-        'dezwjzyy': old_data['dezwjzyy'], # 第二帧未接种原因
-        'dezjzsj': old_data['dezjzsj'], # 第二帧疫苗接种时间
-        'dszymjzqk': old_data['dszymjzqk'], # 第三针疫苗接种情况
-        'dszwjzyy': old_data['dszwjzyy'], # 第三帧未接种原因
-        'dszjzsj': old_data['dszjzsj'], # 第三帧疫苗接种时间
-        'gtshryjkzk': old_data['gtshryjkzk'] ,# 共同生活人员健康情况
-        'extinfo': '', # 扩展信息
+        'jzdz': old_data['jzdz'],  # 居住地址
+        'zrzsdd': old_data['zrzsdd'],  # 昨日居住地点
+        # todo: add new db column for 今日是否在校
+        'sfzx': 5,  # 是否在校
+        'dqszdd': old_data['dqszdd'],  # 当前所在地点
+        'geo_api_infot': old_data['geo_api_infot'],  # 保持昨天的结果
+        'szgj': old_data['szgj'],  # 所在国家
+        'szgj_select_info[id]': 0,  # 所在国家
+        'szgj_select_info[name]': '',  # 所在国家
+        'geo_api_info': old_data['old_city'],  # 保持昨天的结果
+        'dqsfzzgfxdq': old_data['dqsfzzgfxdq'],  # 当前是否在中高风险地区
+        'zgfxljs': old_data['zgfxljs'],  # 中高风险旅居史
+        'tw': '1',  # 体温，不是1就完蛋了
+        'sffrzz': '0',  # 是否发热症状
+        'dqqk1': 1,  # 当前情况状态
+        'dqqk1qt':  '',  # 当前情况其他
+        'dqqk2': 1,  # 当前情况健康码
+        'dqqk2qt':  '',  # 当前情况其他
+        # todo: add new db column for 昨日是否接受核酸检测
+        'sfjshsjc': 0,  # （昨日）是否接受核酸检测
+        'dyzymjzqk': old_data['dyzymjzqk'],  # 第一针疫苗接种情况
+        'dyzwjzyy':  old_data['dyzwjzyy'],  # 第一帧未接种原因
+        'dyzjzsj': old_data['dyzjzsj'],  # 第一帧疫苗接种时间
+        'dezymjzqk': old_data['dezymjzqk'],  # 第二针疫苗接种情况
+        'dezwjzyy': old_data['dezwjzyy'],  # 第二帧未接种原因
+        'dezjzsj': old_data['dezjzsj'],  # 第二帧疫苗接种时间
+        'dszymjzqk': old_data['dszymjzqk'],  # 第三针疫苗接种情况
+        'dszwjzyy': old_data['dszwjzyy'],  # 第三帧未接种原因
+        'dszjzsj': old_data['dszjzsj'],  # 第三帧疫苗接种时间
+        'gtshryjkzk': old_data['gtshryjkzk'],  # 共同生活人员健康情况
+        'extinfo': '',  # 扩展信息
         'app_id': 'ucas'
     }
 
-
-
     return new_data
+
 
 def display_time_formatted():
     # Return human-readable date with current display timezone, regardless of the host's timezone settings
