@@ -4,7 +4,6 @@ import logging
 import requests
 import datetime
 from pytz import timezone as pytz_timezone
-import logging
 import json
 from .config import *
 
