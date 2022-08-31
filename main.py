@@ -14,7 +14,7 @@ import telegram
 
 
 def tguser_check(update, context):
-    if BOT_DEBUG == True and update.message.from_user.id != TG_BOT_MASTER:
+    if BOT_DEBUG is True and update.message.from_user.id != TG_BOT_MASTER:
         update.message.reply_text("DEBUGGING, Try again later.")
         raise DispatcherHandlerStop()
 
@@ -42,7 +42,7 @@ def help_entry(update, context):
 
 def list_entry(update, context, admin_all=False):
     first_message = update.message.reply_markdown(f"用户列表查询中 ...")
-    if admin_all == True:
+    if admin_all is True:
         users = UCASUser.select().where(
             UCASUser.status != UCASUserStatus.removed).prefetch(TGUser)
     else:
@@ -60,7 +60,7 @@ def list_entry(update, context, admin_all=False):
             ret_msg = ''
         id = i+1
         ret_msg += f'ID: `{id}`\n'
-        if user.username != None:
+        if user.username is not None:
             # Password: `{user.password}`\n'
             ret_msg += f'Username: `{user.username}`\n'
         else:
@@ -72,7 +72,7 @@ def list_entry(update, context, admin_all=False):
             ret_msg += f'自动签到: `启用`\n'
         else:
             ret_msg += f'自动签到: `暂停`\n'
-        if user.latest_response_data == None:
+        if user.latest_response_data is None:
             ret_msg += '从未尝试签到\n'
         else:
             ret_msg += f'最后签到时间: `{user.latest_response_time}`\n'
