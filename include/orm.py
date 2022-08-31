@@ -29,7 +29,8 @@ class TGUser(BaseModel):
 
     def get_ucasusers_by_seqids(self, seqids: List[int]):
         available_targets = self.get_ucasusers()
-        assert max(seqids) <= len(available_targets), "Seqid out of range."
+        if max(seqids) > len(available_targets):
+            raise AssertionError("Seqid out of range.")
 
         return [available_targets[i-1] for i in seqids]
 
@@ -61,12 +62,15 @@ class UCASUser(BaseModel):
         return super(UCASUser, self).save(*args, **kwargs)
 
     def check_status(self):
-        assert self.status != UCASUserStatus.stopped
-        assert self.status != UCASUserStatus.removed
+        if self.status == UCASUserStatus.stopped:
+            raise AssertionError
+        if self.status == UCASUserStatus.removed:
+            raise AssertionError
 
     def login(self):
         self.check_status()
-        assert self.username != None
+        if self.username == None:
+            raise AssertionError
         _logger.info(f"[login] Trying user: {self.username}")
         session = requests.Session()
         session.proxies.update(CHECKIN_PROXY)
@@ -127,7 +131,8 @@ class UCASUser(BaseModel):
                 f'Report Page returned {report_json_resp.status_code}.')
 
         report_json_txt = report_json_resp.text
-        assert '操作成功' in report_json_txt, "报告页面返回信息不正确"
+        if '操作成功' not in report_json_txt:
+            raise AssertionError("报告页面返回信息不正确")
 
         # 从接口中提取 POST 的参数
         try:
@@ -145,7 +150,8 @@ class UCASUser(BaseModel):
                                        # headers={ 'X-Requested-With': 'XMLHttpRequest'},
                                        timeout=API_TIMEOUT
                                        )
-        assert report_api_resp.status_code == 200, "提交 API 状态异常"
+        if report_api_resp.status_code != 200:
+            raise AssertionError("提交 API 状态异常")
         self.latest_response_data = report_api_resp.text.strip()
         self.latest_response_time = datetime.datetime.now()
         self.save()

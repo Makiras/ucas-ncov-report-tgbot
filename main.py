@@ -199,7 +199,8 @@ def resume_entry(update, context):
 
 
 def remove_entry(update, context):
-    assert len(context.args) > 0, "错误的命令，请用 /help 查看使用帮助。"
+    if len(context.args) <= 0:
+        raise AssertionError("错误的命令，请用 /help 查看使用帮助。")
 
     tguser = TGUser.get(
         userid=update.message.from_user.id
@@ -248,7 +249,8 @@ def tg_debug_logging(update, context):
 
 
 def checkinall_entry(update, context):
-    assert update.message.from_user.id == TG_BOT_MASTER
+    if update.message.from_user.id != TG_BOT_MASTER:
+        raise AssertionError
     if len(context.args) > 0:
         if context.args[0] == 'retry':
             checkin_all_retry()
@@ -257,17 +259,20 @@ def checkinall_entry(update, context):
 
 
 def pauseall_entry(update, context):
-    assert update.message.from_user.id == TG_BOT_MASTER
+    if update.message.from_user.id != TG_BOT_MASTER:
+        raise AssertionError
     pause_all()
 
 
 def listall_entry(update, context):
-    assert update.message.from_user.id == TG_BOT_MASTER
+    if update.message.from_user.id != TG_BOT_MASTER:
+        raise AssertionError
     list_entry(update, context, admin_all=True)
 
 
 def status_entry(update, context):
-    assert update.message.from_user.id == TG_BOT_MASTER
+    if update.message.from_user.id != TG_BOT_MASTER:
+        raise AssertionError
     cron_data = "\n".join(["name: %s, trigger: %s, handler: %s, next: %s" % (
         job.name, job.trigger, job.func, job.next_run_time) for job in scheduler.get_jobs()])
     update.message.reply_text("Cronjob: " + cron_data)
@@ -275,13 +280,15 @@ def status_entry(update, context):
 
 
 def send_message_entry(update, context):
-    assert update.message.from_user.id == TG_BOT_MASTER
+    if update.message.from_user.id != TG_BOT_MASTER:
+        raise AssertionError
     updater.bot.send_message(chat_id=context.args[0], text=' '.join(
         update.message.text.split(' ')[2:]))
 
 
 def broadcast_entry(update, context):
-    assert update.message.from_user.id == TG_BOT_MASTER
+    if update.message.from_user.id != TG_BOT_MASTER:
+        raise AssertionError
     active_userids = set()
     for user in UCASUser.select().where(
         (UCASUser.status == UCASUserStatus.normal)
