@@ -8,15 +8,18 @@ from .function import *
 database_proxy = DatabaseProxy()
 _logger = logging.getLogger(__name__)
 
+
 class BaseModel(Model):
     class Meta:
         database = database_proxy
 
+
 class UCASUserStatus:
-    normal  = 0
+    normal = 0
     stopped = 1
     removed = 2
     warning = 3
+
 
 class TGUser(BaseModel):
     id = AutoField()
@@ -36,9 +39,11 @@ class TGUser(BaseModel):
         else:
             return self.ucasusers.where(UCASUser.status != UCASUserStatus.removed)
 
+
 class UCASUser(BaseModel):
     id = AutoField()
-    owner = ForeignKeyField(model=TGUser, backref='ucasusers', lazy_load=False, index=True, on_delete="CASCADE", on_update="CASCADE")
+    owner = ForeignKeyField(model=TGUser, backref='ucasusers', lazy_load=False,
+                            index=True, on_delete="CASCADE", on_update="CASCADE")
     username = CharField(null=True)
     password = CharField(null=True)
     cookie_eaisess = CharField(null=True)
@@ -83,9 +88,10 @@ class UCASUser(BaseModel):
             _logger.info(f'[login] Succeed! user: {self.username}.')
             return session
         else:
-            _logger.warning(f'[login] Failed! user: {self.username}, ret: {ret_data}')
+            _logger.warning(
+                f'[login] Failed! user: {self.username}, ret: {ret_data}')
             raise RuntimeWarning(f'Login failed! Server return: `{ret_data}`')
-    
+
     def pause(self):
         self.status = UCASUserStatus.stopped
         self.save()
@@ -97,13 +103,14 @@ class UCASUser(BaseModel):
         session.proxies.update(CHECKIN_PROXY)
         session.headers.update({'User-Agent': REQUESTS_USERAGENT})
         if self.cookie_eaisess != None:
-            cookies={
+            cookies = {
                 'eai-sess': self.cookie_eaisess,
                 'UUKey': self.cookie_uukey
             }
             requests.utils.add_dict_to_cookiejar(session.cookies, cookies)
 
-        report_json_resp = session.get(REPORT_DATA_API, allow_redirects=False, timeout=API_TIMEOUT)
+        report_json_resp = session.get(
+            REPORT_DATA_API, allow_redirects=False, timeout=API_TIMEOUT)
         _logger.debug(f'[report page] status: {report_json_resp.status_code}')
         if report_json_resp.status_code == 302:
             if self.username != None:
@@ -111,10 +118,13 @@ class UCASUser(BaseModel):
             else:
                 self.status = UCASUserStatus.warning
                 self.save()
-                raise RuntimeWarning(f'Cookies expired with no login info set. Please update your cookie. \neai-sess:`{self.cookie_eaisess}`')
-            report_json_resp = session.get(REPORT_DATA_API, allow_redirects=False, timeout=API_TIMEOUT)
+                raise RuntimeWarning(
+                    f'Cookies expired with no login info set. Please update your cookie. \neai-sess:`{self.cookie_eaisess}`')
+            report_json_resp = session.get(
+                REPORT_DATA_API, allow_redirects=False, timeout=API_TIMEOUT)
         if report_json_resp.status_code != 200:
-            RuntimeError(f'Report Page returned {report_json_resp.status_code}.')
+            RuntimeError(
+                f'Report Page returned {report_json_resp.status_code}.')
 
         report_json_txt = report_json_resp.text
         assert '操作成功' in report_json_txt, "报告页面返回信息不正确"
@@ -132,9 +142,9 @@ class UCASUser(BaseModel):
 
         # 最终 POST
         report_api_resp = session.post(REPORT_API, data=post_data,
-            # headers={ 'X-Requested-With': 'XMLHttpRequest'},
-            timeout=API_TIMEOUT
-        )
+                                       # headers={ 'X-Requested-With': 'XMLHttpRequest'},
+                                       timeout=API_TIMEOUT
+                                       )
         assert report_api_resp.status_code == 200, "提交 API 状态异常"
         self.latest_response_data = report_api_resp.text.strip()
         self.latest_response_time = datetime.datetime.now()
@@ -148,5 +158,4 @@ class UCASUser(BaseModel):
 
 def db_init():
     database_proxy.connect()
-    database_proxy.create_tables([TGUser,UCASUser])
-
+    database_proxy.create_tables([TGUser, UCASUser])
