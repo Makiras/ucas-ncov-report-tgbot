@@ -76,7 +76,7 @@ def extract_post_data(json_txt: str) -> Dict[str, str]:
         'jzdz': old_data['jzdz'],  # 居住地址
         'zrzsdd': old_data['zrzsdd'],  # 昨日居住地点
         # todo: add new db column for 今日是否在校
-        'sfzx': 5,  # 是否在校
+        'sfzx': 5,  # 是否在校, 1 雁栖湖 2 玉泉路 3 中关村 4 奥运村 5 校外
         'dqszdd': old_data['dqszdd'],  # 当前所在地点
         'geo_api_infot': old_data['geo_api_infot'],  # 保持昨天的结果
         'szgj': old_data['szgj'],  # 所在国家

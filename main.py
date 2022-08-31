@@ -165,6 +165,56 @@ def checkin_entry(update, context):
             ret_msg = f"用户：`{ucasuser.username or ucasuser.cookie_eaisess or '[None]'}`\n签到异常！\n服务器返回：`{e}`"
         update.message.reply_markdown(ret_msg)
 
+def nowloc_entry(update, context):
+    tguser = TGUser.get(
+        userid=update.message.from_user.id
+    )
+    if len(context.args) != 1:
+        ret_msg = "请携带位置参数编号，例如 `/nowloc 1`,\n"\
+                "`/nowloc 1` : 雁栖湖\n"\
+                "`/nowloc 2` : 玉泉路\n"\
+                "`/nowloc 3` : 中关村\n"\
+                "`/nowloc 4` : 奥运村\n"\
+                "`/nowloc 5` : 京外"
+        update.message.reply_markdown(ret_msg)
+        return
+    if len(context.args) == 1:
+        if type(context.args[0]) == int:
+            loc = context.args[0]
+            targets = tguser.get_ucasusers()
+        else:
+            targets = tguser.get_ucasusers_by_seqids(list(map(int, context.args[0].split(' ')[0])))
+            loc = context.args[0].split(' ')[-1]
+
+    if len(targets) == 0:
+        ret_msg = '用户列表为空'
+        update.message.reply_markdown(ret_msg)
+        return
+    for ucasuser in targets:
+        ucasuser.now_location = int(loc)
+        ucasuser.save()
+        ret_msg = f"用户：`{ucasuser.username or ucasuser.cookie_eaisess or '[None]'}`\n位置设置成功！\n当前位置：`{ucasuser.now_location}`"
+        update.message.reply_markdown(ret_msg)
+
+def haspcr_entry(update, context):
+    tguser = TGUser.get(
+        userid=update.message.from_user.id
+    )
+    if len(context.args) > 0:
+        targets = tguser.get_ucasusers_by_seqids(list(map(int, context.args)))
+    else:
+        targets = tguser.get_ucasusers()
+
+    if len(targets) == 0:
+        ret_msg = '用户列表为空'
+        update.message.reply_markdown(ret_msg)
+        return
+    for ucasuser in targets:
+        ucasuser.has_pcr = 1
+        ucasuser.save()
+        ret_msg = f"用户：`{ucasuser.username or ucasuser.cookie_eaisess or '[None]'}`\n今日核酸设置成功！"
+        update.message.reply_markdown(ret_msg)
+
 
 def pause_entry(update, context):
     tguser = TGUser.get(
@@ -407,11 +457,13 @@ def main():
     dp.add_handler(CommandHandler("add_by_uid", add_by_uid_entry))
     dp.add_handler(CommandHandler("add_by_cookie", add_by_cookie_entry))
     dp.add_handler(CommandHandler("checkin", checkin_entry))
+    dp.add_handler(CommandHandler("nowloc", nowloc_entry))
+    dp.add_handler(CommandHandler("haspcr", haspcr_entry))
     dp.add_handler(CommandHandler("pause", pause_entry))
     dp.add_handler(CommandHandler("resume", resume_entry))
     dp.add_handler(CommandHandler("remove", remove_entry))
     dp.add_handler(MessageHandler(Filters.regex(
-        r'^/(remove|resume|pause|checkin)_.*$'), text_command_entry))
+        r'^/(remove|resume|pause|checkin|nowloc|haspcr)_.*$'), text_command_entry))
     dp.add_handler(CommandHandler("checkinall", checkinall_entry))
     dp.add_handler(CommandHandler("pauseall", pauseall_entry))
     dp.add_handler(CommandHandler("listall", listall_entry))

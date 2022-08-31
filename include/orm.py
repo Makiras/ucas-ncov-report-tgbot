@@ -1,4 +1,6 @@
 import datetime
+from turtle import pos
+import requests
 from typing import List
 from peewee import *
 from playhouse.migrate import *
@@ -51,6 +53,9 @@ class UCASUser(BaseModel):
     latest_data = TextField(null=True)
     latest_response_data = TextField(null=True)
     latest_response_time = DateTimeField(null=True, index=True)
+
+    now_location = IntegerField(default=0)
+    has_pcr = IntegerField(default=0)
 
     status = IntegerField(index=True, default=UCASUserStatus.normal)
     create_time = DateTimeField(default=datetime.datetime.now, index=True)
@@ -135,7 +140,46 @@ class UCASUser(BaseModel):
         except Exception as e:
             _logger.warning(f'[report page] Failed to extract post data. {e}')
             raise RuntimeError(f'Failed to generate post data. {e}')
-        self.latest_data = json.dumps(post_data)
+
+        geo_info_str = json.dumps(
+            post_data['geo_api_info'], ensure_ascii=False)
+
+        # 根据用户的信息，修改 POST 的参数
+        if json.loads(post_data['geo_api_info'])["address"] == "":
+            self.status = UCASUserStatus.stopped
+            self.save()
+            raise AssertionError("未获取到历史地理位置信息，请手动打卡。")
+
+        if self.now_location == 0:
+            school_area = ""
+            if "怀柔" in geo_info_str:
+                self.now_location = 1
+                school_area = "雁栖湖校区"
+            elif "石景山" in geo_info_str:
+                self.now_location = 2
+                school_area = "玉泉路校区"
+            elif "海淀" in geo_info_str:
+                self.now_location = 3
+                school_area = "中关村校区"
+            elif "朝阳" in geo_info_str:
+                self.now_location = 4
+                school_area = "奥运村校区"
+            else:
+                self.now_location = 5
+                school_area = "否"
+            self.save()
+            raise AssertionError("您没有使用 /nowloc 指定当前位置, 本次打卡已取消。\n"
+                                 "考虑到您的地点在{}，我们已帮您自动设置在校情况为{}。\n"
+                                 "如无需更改，下次打卡会使用该设置。\n".format(geo_info_str, school_area))
+        post_data['sfzx'] = self.now_location
+
+        if self.has_pcr == 1:
+            post_data['sfjshsjc'] = 1
+            self.has_par = 0
+            self.save()
+
+
+        self.latest_data = json.dumps(post_data, ensure_ascii=False)
         self.save()
         _logger.debug(f'[report api] Final data: {post_data}')
         print(post_data)
