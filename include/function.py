@@ -1,7 +1,6 @@
 import re
 from typing import Dict, Optional
 import logging
-import requests
 import datetime
 from pytz import timezone as pytz_timezone
 import json
