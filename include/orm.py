@@ -66,7 +66,7 @@ class UCASUser(BaseModel):
 
     def login(self):
         self.check_status()
-        assert self.username != None
+        assert self.username is not None
         _logger.info(f"[login] Trying user: {self.username}")
         session = requests.Session()
         session.proxies.update(CHECKIN_PROXY)
@@ -102,7 +102,7 @@ class UCASUser(BaseModel):
         session = requests.Session()
         session.proxies.update(CHECKIN_PROXY)
         session.headers.update({'User-Agent': REQUESTS_USERAGENT})
-        if self.cookie_eaisess != None:
+        if self.cookie_eaisess is not None:
             cookies = {
                 'eai-sess': self.cookie_eaisess,
                 'UUKey': self.cookie_uukey
@@ -113,7 +113,7 @@ class UCASUser(BaseModel):
             REPORT_DATA_API, allow_redirects=False, timeout=API_TIMEOUT)
         _logger.debug(f'[report page] status: {report_json_resp.status_code}')
         if report_json_resp.status_code == 302:
-            if self.username != None:
+            if self.username is not None:
                 session = self.login()
             else:
                 self.status = UCASUserStatus.warning
