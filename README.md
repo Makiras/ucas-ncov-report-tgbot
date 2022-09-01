@@ -1,4 +1,4 @@
-# BUPT 2019-nCoV Report Bot
+# UCAS 2019-nCoV Report Bot
 
 [Click here to try Online](https://t.me/ucasncovbot)
 
