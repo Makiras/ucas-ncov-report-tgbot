@@ -178,7 +178,6 @@ class UCASUser(BaseModel):
             self.has_par = 0
             self.save()
 
-
         self.latest_data = json.dumps(post_data, ensure_ascii=False)
         self.save()
         _logger.debug(f'[report api] Final data: {post_data}')
